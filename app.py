@@ -1,89 +1,21 @@
+import os
 import cv2
 import numpy as np
-from skimage import io, transform
+from skimage import transform
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
-import os
-import uuid
-import time
 
-# Initialize Flask app
+import pytesseract
+from PIL import Image
+
 app = Flask(__name__)
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
-# Configure upload folder and allowed extensions
-UPLOAD_FOLDER = 'static/uploads'
-PROCESSED_FOLDER = 'static/processed'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['PROCESSED_FOLDER'] = PROCESSED_FOLDER
-
-# Create upload folders if they don't exist
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-os.makedirs(PROCESSED_FOLDER, exist_ok=True)
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-# Image preprocessing functions
-
-def preprocess_image(image_path):
-    """
-    Preprocess the image to:
-    1. Detect edges and dominant lines
-    2. Correct orientation based on line detection
-    3. Save the processed images
-    """
-    # Read the image
-    img = cv2.imread(image_path)
-    if img is None:
-        raise ValueError(f"Could not read image at {image_path}")
-
-    # Convert to grayscale
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    # Apply edge detection
-    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
-
-    # Use Hough Line Transform to detect dominant lines
-    lines = cv2.HoughLines(edges, 1, np.pi/180, 200)
-
-    # Find most common angle
-    angles = []
-    for line in lines:
-        rho, theta = line[0]
-        angle = theta * 180 / np.pi
-        angles.append(angle)
-
-    # Find most frequent angle
-    from collections import Counter
-    angle_counts = Counter(np.round(angles, 1))
-    dominant_angle = angle_counts.most_common(1)[0][0]
-
-    # Calculate correction angle
-    if dominant_angle < 45:
-        correction_angle = dominant_angle
-    elif dominant_angle < 135:
-        correction_angle = dominant_angle - 90
-    else:
-        correction_angle = dominant_angle - 180
-
-    # Rotate to correct the image orientation
-    rotated = transform.rotate(img, -correction_angle)
-
-    # Save the processed image at different stages
-    timestamp = int(time.time())
-    base_filename = f"{timestamp}_{os.path.basename(image_path)}"
-    
-    # Save rotated image
-    rotated_path = os.path.join(app.config['PROCESSED_FOLDER'], f"rotated_{base_filename}")
-    cv2.imwrite(rotated_path, rotated * 255)  # skimage returns float values, multiply by 255 for uint8 format
-
-    return {
-        "original": image_path,
-        "rotated": rotated_path
-    }
-
-# Flask routes
 
 @app.route('/')
 def index():
@@ -100,21 +32,71 @@ def upload_file():
         return redirect(request.url)
     
     if file and allowed_file(file.filename):
-        # Create unique filename
-        filename = secure_filename(file.filename)
-        unique_filename = f"{uuid.uuid4().hex}_{filename}"
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(filepath)
-        
+
         try:
-            # Process the image
-            result_paths = preprocess_image(filepath)
-            # Pass the paths to the result template
-            return render_template('result.html', result=result_paths)
+            rotated_image_path = process_image(filepath)
+            return render_template('result.html', result={
+                'original': filepath,
+                'oriented': rotated_image_path
+            })
         except Exception as e:
             return render_template('error.html', error=str(e))
-    
+
     return redirect(request.url)
+
+
+
+def process_image(image_path):
+    img = cv2.imread(image_path)
+    if img is None:
+        raise FileNotFoundError("The image file was not found!")
+
+    # Step 1: Convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Step 2: Edge detection
+    edges = cv2.Canny(gray, 50, 150, apertureSize=3)
+
+    # Step 3: Hough line transform to find predominant angles
+    lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
+    if lines is not None:
+        angles = []
+        for rho, theta in lines[:,0]:
+            angle = (theta * 180 / np.pi) - 90  # shift to [-90, 90]
+            if -45 < angle < 45:
+                angles.append(angle)
+        if angles:
+            median_angle = np.median(angles)
+            (h, w) = img.shape[:2]
+            M = cv2.getRotationMatrix2D((w // 2, h // 2), median_angle, 1.0)
+            img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+
+    # Step 4: OCR orientation detection using pytesseract
+    try:
+        osd = pytesseract.image_to_osd(Image.fromarray(img), output_type=pytesseract.Output.DICT)
+        angle = osd.get("rotate", 0)
+        if angle != 0:
+            (h, w) = img.shape[:2]
+            M = cv2.getRotationMatrix2D((w // 2, h // 2), -angle, 1.0)
+            img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
+    except:
+        pass  # Fallback silently if OCR fails
+
+    # Save final rotated image
+    rotated_image_path = os.path.join(os.path.dirname(image_path), 'rotated_' + os.path.basename(image_path))
+    cv2.imwrite(rotated_image_path, img)
+    return rotated_image_path
+
+
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/error')
+def error():
+    return render_template('error.html', error="An error occurred during processing.")
 
 if __name__ == '__main__':
     app.run(debug=True)

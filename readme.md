@@ -1,4 +1,6 @@
+Here’s your updated `README` with the reference to `pytesseract` installation replaced by a note to install from `requirements.txt` instead:
 
+---
 
 This is a Flask-based web application that detects and corrects the orientation of uploaded document images using computer vision and OCR techniques. It supports image uploads and visually returns both the original and correctly oriented versions along with the detected rotation angles.
 
@@ -27,7 +29,7 @@ This is a Flask-based web application that detects and corrects the orientation 
 * Python + Flask
 * OpenCV (`cv2`)
 * NumPy
-* Tesseract OCR (`pytesseract`)
+* Tesseract OCR
 * PIL (Python Imaging Library)
 * HTML templates (Jinja2)
 
@@ -39,11 +41,9 @@ The orientation detection and correction logic performs **accurately and reliabl
 
 ✅ **Effective Working Angle Ranges:**
 
-* **-45 50 45°**
+* **-45° to 45°**
 
 ⚠️ **Outside this range**, results might vary due to noise or ambiguous edge detection.
-
-
 
 ---
 
@@ -79,7 +79,7 @@ The orientation detection and correction logic performs **accurately and reliabl
    pip install -r requirements.txt
    ```
 
-2. **Install Tesseract-OCR**
+2. **Install Tesseract-OCR (System dependency)**
 
    * Windows: [Download here](https://github.com/tesseract-ocr/tesseract/wiki)
    * Linux:
@@ -99,30 +99,3 @@ The orientation detection and correction logic performs **accurately and reliabl
    ```
    http://localhost:5000/
    ```
-
----
-
-## 🧪 API Endpoint
-
-**POST** `/check_angle`
-
-> Use this endpoint to retrieve only the angle information (for AJAX or headless use).
-
-### Request:
-
-* Form-data with image file (`file`)
-
-### Response:
-
-```json
-{
-  "success": true,
-  "angle_info": {
-    "hough_angle": -12.0,
-    "corrected_angle": -12.0,
-    "ocr_angle": 0
-  }
-}
-```
-
----

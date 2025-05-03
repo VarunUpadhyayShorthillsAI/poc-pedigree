@@ -126,21 +126,3 @@ The orientation detection and correction logic performs **accurately and reliabl
 ```
 
 ---
-
-## ⚠️ Limitations
-
-* May not perform well on:
-
-  * Heavily blurred or noisy images
-  * Images with no clear linear structure
-* Designed for **document-type inputs**, not general photos
-
----
-
-## ✍️ Author
-
-**Varun Upadhyay**
-
----
-
-Let me know if you want me to create a `requirements.txt` file as well?

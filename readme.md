@@ -1,6 +1,4 @@
-Here’s your updated `README` with the reference to `pytesseract` installation replaced by a note to install from `requirements.txt` instead:
 
----
 
 This is a Flask-based web application that detects and corrects the orientation of uploaded document images using computer vision and OCR techniques. It supports image uploads and visually returns both the original and correctly oriented versions along with the detected rotation angles.
 

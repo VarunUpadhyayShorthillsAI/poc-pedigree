@@ -47,6 +47,7 @@ def upload_file():
 
     return redirect(request.url)
 
+
 def process_image(image_path):
     try:
         if not os.path.exists(image_path):
@@ -68,19 +69,17 @@ def process_image(image_path):
         except Exception as e:
             raise RuntimeError(f"Error in edge detection: {e}")
  
-        # Step 3: Improved Hough transform for skew detection that handles all angles
+        # Step 3: Improved Hough transform for skew detection
         detected_angle = None
+        corrected_angle = None
         try:
             lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
             
             if lines is not None and len(lines) > 0:
-                # Process all angles without range restriction
                 angles = []
                 for rho, theta in lines[:, 0]:
-                    # Convert to degrees and normalize to [-90, 90] range
                     angle_degrees = np.degrees(theta) - 90
                     
-                    # Normalize angle to proper range
                     if angle_degrees < -90:
                         angle_degrees += 180
                     elif angle_degrees > 90:
@@ -89,24 +88,32 @@ def process_image(image_path):
                     angles.append(angle_degrees)
                 
                 if angles:
-                    # Use a histogram approach to find the most common angle
                     hist, bins = np.histogram(angles, bins=180, range=(-90, 90))
                     most_common_angle_idx = np.argmax(hist)
-                    detected_angle = bins[most_common_angle_idx] + (bins[1] - bins[0])/2  # Use bin center
+                    detected_angle = bins[most_common_angle_idx] + (bins[1] - bins[0])/2
                     
                     print(f"Detected document rotation angle: {detected_angle:.2f} degrees")
                     
-                    # Apply rotation correction
                     (h, w) = img.shape[:2]
                     center = (w // 2, h // 2)
-                    M = cv2.getRotationMatrix2D(center, detected_angle, 1.0)
+
+                    # Correction logic: Keep angles between -45 and 45
+                    corrected_angle = detected_angle
+                    if detected_angle < -45:
+                        corrected_angle += 180
+                    elif detected_angle > 45:
+                        corrected_angle -= 180
+
+                    print(f"Corrected angle after normalization: {corrected_angle:.2f} degrees")
+                    
+                    M = cv2.getRotationMatrix2D(center, corrected_angle, 1.0)
                     img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR, 
-                                        borderMode=cv2.BORDER_REPLICATE)
+                                         borderMode=cv2.BORDER_REPLICATE)
         except Exception as e:
             print(f"Error in Hough transform: {e}")
             # Continue processing even if Hough transform fails
- 
-        # Step 4: OCR orientation detection as a backup/refinement
+
+        # Step 4: OCR orientation detection as backup
         ocr_angle = None
         try:
             osd = pytesseract.image_to_osd(Image.fromarray(img), output_type=pytesseract.Output.DICT)
@@ -115,22 +122,22 @@ def process_image(image_path):
             if ocr_angle not in [0, None]:
                 print(f"OCR detected orientation adjustment: {ocr_angle} degrees")
                 
-                # Only apply OCR rotation if significant and different from Hough detection
                 if abs(ocr_angle) >= 5:
                     (h, w) = img.shape[:2]
                     center = (w // 2, h // 2)
                     M = cv2.getRotationMatrix2D(center, -ocr_angle, 1.0)
                     img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR, 
-                                        borderMode=cv2.BORDER_REPLICATE)
+                                         borderMode=cv2.BORDER_REPLICATE)
         except pytesseract.TesseractNotFoundError:
             raise RuntimeError("Tesseract not found. Make sure it's installed and in your system PATH.")
         except Exception as e:
             print(f"OCR orientation detection failed (continuing without it): {e}")
- 
+
         # Step 5: Save result and return information
         try:
             angle_info = {
                 "hough_angle": round(detected_angle, 2) if detected_angle is not None else None,
+                "corrected_angle": round(corrected_angle, 2) if corrected_angle is not None else None,
                 "ocr_angle": ocr_angle
             }
             
@@ -143,6 +150,10 @@ def process_image(image_path):
  
     except Exception as err:
         raise RuntimeError(f"Image processing failed: {err}")
+
+
+
+
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):

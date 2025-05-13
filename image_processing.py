@@ -5,7 +5,7 @@ import pytesseract
 import os
 import logging
 
-# Setup logger
+# Setup logger for image processing
 image_logger = logging.getLogger('image_processing_logger')
 image_logger.setLevel(logging.INFO)
 handler = logging.StreamHandler()
@@ -32,12 +32,11 @@ def process_image(image_path, file):
         if img is None:
             raise ValueError("Image file could not be read. Possibly corrupt or unsupported format.")
 
-        # Step 2: Edge detection
+        # Edge detection using Canny
         edges = cv2.Canny(img, 50, 150, apertureSize=3)
 
-        # Step 3: Hough transform
-        detected_angle = None
-        corrected_angle = None
+        # Hough Transform
+        detected_angle, corrected_angle = None, None
         lines = cv2.HoughLines(edges, 1, np.pi / 180, 200)
 
         if lines is not None and len(lines) > 0:
@@ -68,10 +67,9 @@ def process_image(image_path, file):
                 image_logger.info(f"Corrected angle after normalization: {corrected_angle:.2f} degrees")
 
                 M = cv2.getRotationMatrix2D(center, corrected_angle, 1.0)
-                img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR,
-                                    borderMode=cv2.BORDER_REPLICATE)
+                img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
 
-        # Step 4: OCR orientation detection
+        # OCR Orientation detection
         ocr_angle = None
         try:
             osd = pytesseract.image_to_osd(Image.fromarray(img), output_type=pytesseract.Output.DICT)
@@ -82,14 +80,13 @@ def process_image(image_path, file):
                     (h, w) = img.shape[:2]
                     center = (w // 2, h // 2)
                     M = cv2.getRotationMatrix2D(center, -ocr_angle, 1.0)
-                    img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR,
-                                        borderMode=cv2.BORDER_REPLICATE)
+                    img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR, borderMode=cv2.BORDER_REPLICATE)
         except pytesseract.TesseractNotFoundError:
             raise RuntimeError("Tesseract not found. Make sure it's installed and in your system PATH.")
         except Exception as e:
             image_logger.warning(f"OCR orientation detection failed (continuing without it): {e}")
 
-        # Step 5: Save result
+        # Save result
         angle_info = {
             "hough_angle": round(detected_angle, 2) if detected_angle is not None else None,
             "corrected_angle": round(corrected_angle, 2) if corrected_angle is not None else None,

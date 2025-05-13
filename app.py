@@ -1,11 +1,9 @@
 import os
 import cv2
 import numpy as np
-from skimage import transform
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory, jsonify
-
-import pytesseract
 from PIL import Image
+import pytesseract
 
 app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
@@ -40,13 +38,25 @@ def upload_file():
             return render_template('result.html', result={
                 'original': filepath,
                 'oriented': rotated_image_path,
-                'angle_info': angle_info  # Pass angle information to the template
+                'angle_info': angle_info
             })
         except Exception as e:
             return render_template('error.html', error=str(e))
 
     return redirect(request.url)
 
+# def estimate_skew_by_contours(image):
+#     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+#     blur = cv2.GaussianBlur(gray, (9, 9), 0)
+#     _, thresh = cv2.threshold(blur, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
+
+#     coords = np.column_stack(np.where(thresh > 0))
+#     if coords.shape[0] < 50:
+#         return 0
+
+#     mean, eigenvectors = cv2.PCACompute(coords.astype(np.float32), mean=None)
+#     angle = np.arctan2(eigenvectors[0, 1], eigenvectors[0, 0]) * 180 / np.pi
+#     return angle
 
 def process_image(image_path):
     try:
@@ -96,23 +106,23 @@ def process_image(image_path):
                     
                     (h, w) = img.shape[:2]
                     center = (w // 2, h // 2)
-
+ 
                     # Correction logic: Keep angles between -45 and 45
                     corrected_angle = detected_angle
                     if detected_angle < -45:
                         corrected_angle += 180
                     elif detected_angle > 45:
                         corrected_angle -= 180
-
+ 
                     print(f"Corrected angle after normalization: {corrected_angle:.2f} degrees")
                     
                     M = cv2.getRotationMatrix2D(center, corrected_angle, 1.0)
-                    img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR, 
+                    img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR,
                                          borderMode=cv2.BORDER_REPLICATE)
         except Exception as e:
             print(f"Error in Hough transform: {e}")
             # Continue processing even if Hough transform fails
-
+ 
         # Step 4: OCR orientation detection as backup
         ocr_angle = None
         try:
@@ -122,17 +132,17 @@ def process_image(image_path):
             if ocr_angle not in [0, None]:
                 print(f"OCR detected orientation adjustment: {ocr_angle} degrees")
                 
-                if abs(ocr_angle) >= 5:
+                if abs(ocr_angle) >= 20:
                     (h, w) = img.shape[:2]
                     center = (w // 2, h // 2)
                     M = cv2.getRotationMatrix2D(center, -ocr_angle, 1.0)
-                    img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR, 
+                    img = cv2.warpAffine(img, M, (w, h), flags=cv2.INTER_LINEAR,
                                          borderMode=cv2.BORDER_REPLICATE)
         except pytesseract.TesseractNotFoundError:
             raise RuntimeError("Tesseract not found. Make sure it's installed and in your system PATH.")
         except Exception as e:
             print(f"OCR orientation detection failed (continuing without it): {e}")
-
+ 
         # Step 5: Save result and return information
         try:
             angle_info = {
@@ -150,10 +160,7 @@ def process_image(image_path):
  
     except Exception as err:
         raise RuntimeError(f"Image processing failed: {err}")
-
-
-
-
+ 
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
@@ -163,7 +170,6 @@ def uploaded_file(filename):
 def error():
     return render_template('error.html', error="An error occurred during processing.")
 
-# Add a route to get just the angle info for AJAX requests
 @app.route('/check_angle', methods=['POST'])
 def check_angle():
     if 'file' not in request.files:

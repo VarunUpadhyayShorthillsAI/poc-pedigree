@@ -1,0 +1,93 @@
+2025-05-13 13:09:54,704 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-05-13 13:09:54,705 - INFO - [33mPress CTRL+C to quit[0m
+2025-05-13 13:09:54,705 - INFO -  * Restarting with stat
+2025-05-13 13:09:54,934 - WARNING -  * Debugger is active!
+2025-05-13 13:09:54,935 - INFO -  * Debugger PIN: 105-720-120
+2025-05-13 13:09:58,409 - INFO - 127.0.0.1 - - [13/May/2025 13:09:58] "[33mPOST /upload HTTP/1.1[0m" 404 -
+2025-05-13 13:10:02,144 - INFO - 127.0.0.1 - - [13/May/2025 13:10:02] "[33mPOST /upload HTTP/1.1[0m" 404 -
+2025-05-13 13:10:04,564 - INFO - 127.0.0.1 - - [13/May/2025 13:10:04] "GET / HTTP/1.1" 200 -
+2025-05-13 13:10:04,589 - INFO - 127.0.0.1 - - [13/May/2025 13:10:04] "GET / HTTP/1.1" 200 -
+2025-05-13 13:10:13,113 - INFO - 127.0.0.1 - - [13/May/2025 13:10:13] "[33mPOST /upload HTTP/1.1[0m" 404 -
+2025-05-13 13:11:00,271 - INFO -  * Detected change in '/home/shtlp_0031/Videos/preprocessing-task/app.py', reloading
+2025-05-13 13:11:00,328 - INFO -  * Restarting with stat
+2025-05-13 13:11:00,576 - WARNING -  * Debugger is active!
+2025-05-13 13:11:00,576 - INFO -  * Debugger PIN: 105-720-120
+2025-05-13 13:11:33,106 - INFO - 127.0.0.1 - - [13/May/2025 13:11:33] "[33mPOST /upload HTTP/1.1[0m" 404 -
+2025-05-13 13:12:04,397 - INFO - 127.0.0.1 - - [13/May/2025 13:12:04] "[33mPOST /upload HTTP/1.1[0m" 404 -
+2025-05-13 13:12:58,555 - INFO - 127.0.0.1 - - [13/May/2025 13:12:58] "[33mPOST /upload HTTP/1.1[0m" 404 -
+2025-05-13 13:13:01,865 - INFO - 127.0.0.1 - - [13/May/2025 13:13:01] "[33mPOST /upload HTTP/1.1[0m" 404 -
+2025-05-13 13:13:07,879 - INFO - 127.0.0.1 - - [13/May/2025 13:13:07] "[33mPOST /upload HTTP/1.1[0m" 404 -
+2025-05-13 13:13:25,987 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-05-13 13:13:25,987 - INFO - [33mPress CTRL+C to quit[0m
+2025-05-13 13:13:25,987 - INFO -  * Restarting with stat
+2025-05-13 13:13:26,228 - WARNING -  * Debugger is active!
+2025-05-13 13:13:26,228 - INFO -  * Debugger PIN: 105-720-120
+2025-05-13 13:13:30,926 - INFO - 127.0.0.1 - - [13/May/2025 13:13:30] "[33mPOST /upload HTTP/1.1[0m" 404 -
+2025-05-13 13:15:34,378 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-05-13 13:15:34,378 - INFO - [33mPress CTRL+C to quit[0m
+2025-05-13 13:15:34,378 - INFO -  * Restarting with stat
+2025-05-13 13:15:34,609 - WARNING -  * Debugger is active!
+2025-05-13 13:15:34,610 - INFO -  * Debugger PIN: 105-720-120
+2025-05-13 13:15:38,241 - INFO - 127.0.0.1 - - [13/May/2025 13:15:38] "[33mPOST /upload HTTP/1.1[0m" 404 -
+2025-05-13 13:15:40,489 - INFO - 127.0.0.1 - - [13/May/2025 13:15:40] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:40,529 - INFO - 127.0.0.1 - - [13/May/2025 13:15:40] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:40,700 - INFO - 127.0.0.1 - - [13/May/2025 13:15:40] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:40,733 - INFO - 127.0.0.1 - - [13/May/2025 13:15:40] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:40,919 - INFO - 127.0.0.1 - - [13/May/2025 13:15:40] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:40,953 - INFO - 127.0.0.1 - - [13/May/2025 13:15:40] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:41,119 - INFO - 127.0.0.1 - - [13/May/2025 13:15:41] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:41,157 - INFO - 127.0.0.1 - - [13/May/2025 13:15:41] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:41,285 - INFO - 127.0.0.1 - - [13/May/2025 13:15:41] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:41,321 - INFO - 127.0.0.1 - - [13/May/2025 13:15:41] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:41,455 - INFO - 127.0.0.1 - - [13/May/2025 13:15:41] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:41,493 - INFO - 127.0.0.1 - - [13/May/2025 13:15:41] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:41,639 - INFO - 127.0.0.1 - - [13/May/2025 13:15:41] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:41,675 - INFO - 127.0.0.1 - - [13/May/2025 13:15:41] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:48,466 - INFO - Converted image to grayscale: nancy_day_rotated_255_cw.jpeg
+2025-05-13 13:15:48,494 - INFO - Detected document rotation angle: -74.50 degrees
+2025-05-13 13:15:48,494 - INFO - Corrected angle after normalization: 105.50 degrees
+2025-05-13 13:15:49,402 - ERROR - Processing error: 'result' is undefined
+2025-05-13 13:15:49,404 - INFO - 127.0.0.1 - - [13/May/2025 13:15:49] "POST / HTTP/1.1" 200 -
+2025-05-13 13:15:51,872 - INFO - 127.0.0.1 - - [13/May/2025 13:15:51] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:51,908 - INFO - 127.0.0.1 - - [13/May/2025 13:15:51] "GET / HTTP/1.1" 200 -
+2025-05-13 13:15:57,960 - INFO - Converted image to grayscale: g_6.jpg
+2025-05-13 13:15:58,010 - INFO - Detected document rotation angle: -4.50 degrees
+2025-05-13 13:15:58,010 - INFO - Corrected angle after normalization: -4.50 degrees
+2025-05-13 13:15:58,622 - INFO - OCR detected orientation adjustment: 180 degrees
+2025-05-13 13:15:58,648 - ERROR - Processing error: 'result' is undefined
+2025-05-13 13:15:58,648 - INFO - 127.0.0.1 - - [13/May/2025 13:15:58] "POST / HTTP/1.1" 200 -
+2025-05-13 13:16:13,459 - INFO - 127.0.0.1 - - [13/May/2025 13:16:13] "GET / HTTP/1.1" 200 -
+2025-05-13 13:16:13,501 - INFO - 127.0.0.1 - - [13/May/2025 13:16:13] "GET / HTTP/1.1" 200 -
+2025-05-13 13:16:14,575 - INFO - 127.0.0.1 - - [13/May/2025 13:16:14] "GET / HTTP/1.1" 200 -
+2025-05-13 13:16:14,615 - INFO - 127.0.0.1 - - [13/May/2025 13:16:14] "GET / HTTP/1.1" 200 -
+2025-05-13 13:16:53,019 - INFO - 127.0.0.1 - - [13/May/2025 13:16:53] "GET / HTTP/1.1" 200 -
+2025-05-13 13:16:53,093 - INFO - 127.0.0.1 - - [13/May/2025 13:16:53] "GET / HTTP/1.1" 200 -
+2025-05-13 13:17:04,205 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-05-13 13:17:04,206 - INFO - [33mPress CTRL+C to quit[0m
+2025-05-13 13:17:04,206 - INFO -  * Restarting with stat
+2025-05-13 13:17:04,437 - WARNING -  * Debugger is active!
+2025-05-13 13:17:04,437 - INFO -  * Debugger PIN: 105-720-120
+2025-05-13 13:18:34,898 - INFO -  * Detected change in '/home/shtlp_0031/Videos/preprocessing-task/image_processing.py', reloading
+2025-05-13 13:18:34,962 - INFO -  * Restarting with stat
+2025-05-13 13:18:35,175 - WARNING -  * Debugger is active!
+2025-05-13 13:18:35,175 - INFO -  * Debugger PIN: 105-720-120
+2025-05-13 13:18:43,226 - INFO -  * Detected change in '/home/shtlp_0031/Videos/preprocessing-task/app.py', reloading
+2025-05-13 13:18:43,278 - INFO -  * Restarting with stat
+2025-05-13 13:20:03,952 - INFO -  * Restarting with stat
+2025-05-13 13:21:23,644 - INFO -  * Restarting with stat
+2025-05-13 13:21:29,975 - INFO -  * Restarting with stat
+2025-05-13 13:21:31,284 - INFO -  * Restarting with stat
+2025-05-13 13:21:31,502 - WARNING -  * Debugger is active!
+2025-05-13 13:21:31,503 - INFO -  * Debugger PIN: 105-720-120
+2025-05-13 13:21:32,522 - INFO -  * Detected change in '/home/shtlp_0031/Videos/preprocessing-task/app.py', reloading
+2025-05-13 13:21:32,588 - INFO -  * Restarting with stat
+2025-05-13 13:21:35,887 - INFO -  * Restarting with stat
+2025-05-13 13:21:36,103 - WARNING -  * Debugger is active!
+2025-05-13 13:21:36,103 - INFO -  * Debugger PIN: 105-720-120
+2025-05-13 13:21:48,180 - INFO -  * Detected change in '/home/shtlp_0031/Videos/preprocessing-task/app.py', reloading
+2025-05-13 13:21:48,239 - INFO -  * Restarting with stat
+2025-05-13 13:21:55,558 - INFO -  * Restarting with stat

@@ -20,19 +20,66 @@ def setup_logger(name='image_processing_logger', level=logging.INFO):
     return logger
 
 def load_image(image_path, logger):
-    """Load and convert image to grayscale"""
+    """Load image and preprocess it to improve OCR & orientation correction"""
     if not os.path.exists(image_path):
         raise FileNotFoundError(f"File not found: {image_path}")
     
     try:
-        original_image = Image.open(image_path)
-        grayscaled_image = original_image.convert("L")
-        logger.info(f"Converted image to grayscale: {os.path.basename(image_path)}")
-        return np.array(grayscaled_image)
+        original_image = cv2.imread(image_path)
+
+        if original_image is None:
+            raise ValueError("cv2.imread() failed to read the image.")
+        
+        logger.info(f"Loaded image: {os.path.basename(image_path)}")
+
+        # Step 1: Safe shadow correction using illumination normalization
+        # gray = cv2.cvtColor(original_image, cv2.COLOR_BGR2GRAY)
+        # bg = cv2.medianBlur(gray, 21)
+        # normalized = cv2.divide(gray, bg, scale=255)
+        # logger.info("Illumination normalization (safe shadow correction) applied.")
+
+        # Step 2: White balance correction
+        wb = cv2.xphoto.createSimpleWB()
+        white_balanced = wb.balanceWhite(original_image)
+        logger.info("White balance correction applied.")
+
+        # Step 3: Perspective correction (optional)
+        blurred = cv2.GaussianBlur(white_balanced, (5, 5), 0)
+        edges = cv2.Canny(blurred, 50, 150)
+        contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contours = sorted(contours, key=cv2.contourArea, reverse=True)
+
+        if contours:
+            page = contours[0]
+            epsilon = 0.02 * cv2.arcLength(page, True)
+            approx = cv2.approxPolyDP(page, epsilon, True)
+            if len(approx) == 4:
+                pts = np.float32([pt[0] for pt in approx])
+                rect = np.array(sorted(pts, key=lambda x: (x[1], x[0])))
+                (tl, tr, br, bl) = rect
+                width = int(max(np.linalg.norm(br - bl), np.linalg.norm(tr - tl)))
+                height = int(max(np.linalg.norm(tr - br), np.linalg.norm(tl - bl)))
+                dst = np.array([[0,0],[width-1,0],[width-1,height-1],[0,height-1]], dtype="float32")
+                M = cv2.getPerspectiveTransform(rect, dst)
+                warped = cv2.warpPerspective(white_balanced, M, (width, height))
+                logger.info("Perspective correction applied.")
+            else:
+                warped = white_balanced
+                logger.info("Could not find 4 corners for perspective correction.")
+        else:
+            warped = white_balanced
+            logger.info("No contours found for perspective correction.")
+
+        # Step 4: Final grayscale conversion
+        grayscaled_image = cv2.cvtColor(warped, cv2.COLOR_BGR2GRAY)
+        logger.info("Converted image to grayscale.")
+        return grayscaled_image
+
     except Exception as e:
-        logger.error(f"Failed to convert image to grayscale: {str(e)}")
-        logger.warning(f"Using original image without grayscale conversion")
-        return np.array(original_image)
+        logger.error(f"Preprocessing failed: {str(e)}")
+        raise RuntimeError(f"Preprocessing failed: {str(e)}")
+
+
 
 def detect_angle_hough(img, logger):
     """Detect rotation angle using Hough Transform"""
@@ -121,7 +168,7 @@ def process_image(image_path, file=None):
             
         # Detect and apply OCR-based orientation
         ocr_angle = detect_ocr_orientation(img, logger)
-        if ocr_angle is not None and abs(ocr_angle) >= 20:
+        if ocr_angle is not None and abs(ocr_angle) >= 40:
             img = rotate_image(img, -ocr_angle, logger)
             
         # Save result

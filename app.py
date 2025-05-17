@@ -1,5 +1,7 @@
 import os
-from flask import Flask, render_template, request, redirect, send_from_directory, jsonify
+import cv2
+import numpy as np
+from flask import Flask, render_template, request, redirect, send_from_directory
 from PIL import Image
 from engine import remove_bg_mult
 
@@ -34,10 +36,11 @@ def upload_file():
         file.save(filepath)
 
         try:
-            processed_image_path, info = process_image(filepath)
+            final_path, info = process_image(filepath)
             return render_template('result.html', result={
-                'original': filepath,
-                'oriented': processed_image_path
+                'original': info["original"],
+                'intermediate': info["intermediate"],
+                'oriented': info["final"]
             })
         except Exception as e:
             return render_template('error.html', error=str(e))
@@ -45,23 +48,57 @@ def upload_file():
     return redirect(request.url)
 
 
+def remove_shadow_and_wrinkles(img):
+    """Removes shadows and suppresses wrinkles using morphological ops and bilateral filtering."""
+    rgb_planes = cv2.split(img)
+    result_planes = []
+
+    for plane in rgb_planes:
+        dilated = cv2.dilate(plane, np.ones((7, 7), np.uint8))
+        background = cv2.medianBlur(dilated, 21)
+        diff = 255 - cv2.absdiff(plane, background)
+        norm = cv2.normalize(diff, None, 0, 255, cv2.NORM_MINMAX)
+        result_planes.append(norm)
+
+    shadow_free = cv2.merge(result_planes)
+
+    # Optional wrinkle suppression: bilateral filter
+    wrinkle_free = cv2.bilateralFilter(shadow_free, d=9, sigmaColor=75, sigmaSpace=75)
+    
+    return wrinkle_free
+
+
 def process_image(image_path):
     try:
         if not os.path.exists(image_path):
             raise FileNotFoundError(f"File not found: {image_path}")
 
-        # Step 1: Open input image
-        input_image = Image.open(image_path).convert("RGBA")
+        # Step 1: Remove shadows and wrinkles using OpenCV
+        img_cv = cv2.imread(image_path)
+        cleaned = remove_shadow_and_wrinkles(img_cv)
 
-        # Step 2: Apply background removal (U²-Net)
-        output_image = remove_bg_mult(input_image)
+        # Step 2: Save intermediate cleaned image
+        cleaned_rgb = cv2.cvtColor(cleaned, cv2.COLOR_BGR2RGB)
+        cleaned_pil = Image.fromarray(cleaned_rgb).convert("RGBA")
 
-        # Step 3: Save as PNG to support RGBA
-        output_filename = 'bg_removed_' + os.path.splitext(os.path.basename(image_path))[0] + '.png'
-        output_path = os.path.join(os.path.dirname(image_path), output_filename)
-        output_image.save(output_path, format='PNG')
+        intermediate_filename = 'intermediate_' + os.path.splitext(os.path.basename(image_path))[0] + '.png'
+        intermediate_path = os.path.join(os.path.dirname(image_path), intermediate_filename)
+        cleaned_pil.save(intermediate_path, format='PNG')
 
-        return output_path, {"message": "Background removed successfully."}
+        # Step 3: Remove background using U²-Net
+        output_image = remove_bg_mult(cleaned_pil)
+
+        # Step 4: Save final output image
+        final_filename = 'bg_removed_' + os.path.splitext(os.path.basename(image_path))[0] + '.png'
+        final_path = os.path.join(os.path.dirname(image_path), final_filename)
+        output_image.save(final_path, format='PNG')
+
+        return final_path, {
+            "original": image_path,
+            "intermediate": intermediate_path,
+            "final": final_path,
+            "message": "Processing complete."
+        }
 
     except Exception as err:
         raise RuntimeError(f"Image processing failed: {err}")

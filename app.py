@@ -67,6 +67,25 @@ def remove_shadow_and_wrinkles(img):
     
     return wrinkle_free
 
+def add_subtle_outline(image):
+    """Adds a subtle gray outline around the image borders (not contour-based)."""
+    outlined_image = image.copy()
+    border_color = (32,32,33)  # Light gray
+
+    thickness = 2  # Set to 1 or 2 as needed
+
+    # Top border
+    outlined_image[0:thickness, :] = border_color
+    # Bottom border
+    outlined_image[-thickness:, :] = border_color
+    # Left border
+    outlined_image[:, 0:thickness] = border_color
+    # Right border
+    outlined_image[:, -thickness:] = border_color
+
+    return outlined_image
+
+
 
 def process_image(image_path):
     try:
@@ -78,7 +97,8 @@ def process_image(image_path):
         cleaned = remove_shadow_and_wrinkles(img_cv)
 
         # Step 2: Save intermediate cleaned image
-        cleaned_rgb = cv2.cvtColor(cleaned, cv2.COLOR_BGR2RGB)
+        cleaned_outlined = add_subtle_outline(cleaned)
+        cleaned_rgb = cv2.cvtColor(cleaned_outlined, cv2.COLOR_BGR2RGB)
         cleaned_pil = Image.fromarray(cleaned_rgb).convert("RGBA")
 
         intermediate_filename = 'intermediate_' + os.path.splitext(os.path.basename(image_path))[0] + '.png'
